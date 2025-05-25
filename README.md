@@ -49,6 +49,3 @@ streamlit run app.py
 
 ## Troubleshooting
 - If you see an error about `similarity.pkl` not being a valid pickle, the file may not have downloaded correctly. Check the debug output in the app and verify your Google Drive link and permissions.
-
-## License
-MIT
