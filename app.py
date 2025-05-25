@@ -22,12 +22,15 @@ def download_file_from_google_drive(file_id, destination):
         for chunk in response.iter_content(32768):
             if chunk:
                 f.write(chunk)
-    # Check if the file is actually an HTML warning page (not a pickle)
+    # Debug: print file size and first bytes
+    file_size = os.path.getsize(destination)
     with open(destination, 'rb') as f:
         start = f.read(100)
-        if b'<!DOCTYPE html>' in start or b'<html>' in start:
-            os.remove(destination)
-            raise RuntimeError("Downloaded file is not a valid pickle. Check Google Drive sharing settings and file ID.")
+    st.write(f"Downloaded file size: {file_size} bytes")
+    st.write(f"First 100 bytes: {start[:100]}")
+    if b'<!DOCTYPE html>' in start or b'<html>' in start:
+        os.remove(destination)
+        raise RuntimeError("Downloaded file is not a valid pickle. Check Google Drive sharing settings and file ID.")
 
 def fetch_poster(movie_id):
     api_key = os.getenv('TMDB_API_KEY')
