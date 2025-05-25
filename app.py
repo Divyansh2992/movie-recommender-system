@@ -22,6 +22,12 @@ def download_file_from_google_drive(file_id, destination):
         for chunk in response.iter_content(32768):
             if chunk:
                 f.write(chunk)
+    # Check if the file is actually an HTML warning page (not a pickle)
+    with open(destination, 'rb') as f:
+        start = f.read(100)
+        if b'<!DOCTYPE html>' in start or b'<html>' in start:
+            os.remove(destination)
+            raise RuntimeError("Downloaded file is not a valid pickle. Check Google Drive sharing settings and file ID.")
 
 def fetch_poster(movie_id):
     api_key = os.getenv('TMDB_API_KEY')
@@ -69,8 +75,12 @@ if GOOGLE_DRIVE_FILE_ID and 'drive.google.com' in GOOGLE_DRIVE_FILE_ID:
 
 if not os.path.exists(SIMILARITY_PATH):
     with st.spinner('Downloading similarity.pkl from Google Drive...'):
-        download_file_from_google_drive(GOOGLE_DRIVE_FILE_ID, SIMILARITY_PATH)
-        st.success('Downloaded similarity.pkl!')
+        try:
+            download_file_from_google_drive(GOOGLE_DRIVE_FILE_ID, SIMILARITY_PATH)
+            st.success('Downloaded similarity.pkl!')
+        except Exception as e:
+            st.error(f"Failed to download similarity.pkl: {e}")
+            st.stop()
 
 movies = pickle.load(open('movies.pkl', 'rb'))
 similarity = pickle.load(open(SIMILARITY_PATH, 'rb'))
